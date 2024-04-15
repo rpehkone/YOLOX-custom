@@ -218,7 +218,8 @@ float* blobFromImage(cv::Mat& img){
         {
             for (size_t w = 0; w < img_w; w++) 
             {
-                blob[c * img_w * img_h + h * img_w + w] =
+                size_t invc = ((size_t)channels - 1) - c;
+                blob[invc * img_w * img_h + h * img_w + w] =
                     (float)img.at<cv::Vec3b>(h, w)[c];
             }
         }
