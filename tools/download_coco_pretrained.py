@@ -29,3 +29,4 @@ download_file("https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0
 download_file("https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_m.pth")
 download_file("https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_l.pth")
 download_file("https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_x.pth")
+download_file("https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_darknet.pth")

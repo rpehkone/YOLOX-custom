@@ -12,12 +12,12 @@ from yolox.data.data_augment import ValTransform
 from yolox.data.datasets import COCO_CLASSES
 from yolox.exp import get_exp
 
-# from boxmotxx import StrongSORT
-# from boxmotxx import OCSORT
-# from boxmotxx import BYTETracker
-# from boxmotxx import BoTSORT
-# from boxmotxx import DeepOCSORT
-# from boxmotxx import HybridSORT
+# from boxmot import StrongSORT
+# from boxmot import OCSORT
+# from boxmot import BYTETracker
+# from boxmot import BoTSORT
+# from boxmot import DeepOCSORT
+# from boxmot import HybridSORT
 
 class Predictor(object):
     def __init__(
@@ -160,6 +160,8 @@ class Args:
         self.cls_names = None
         self.name = "yolox-x"
         self.ckpt = "weights/yolox_x.pth"
+        # self.name = "yolov3"
+        # self.ckpt = "weights/yolox_darknet.pth"
         self.exp_file = None
         self.device = "gpu"
         # self.device = "mps"
@@ -289,7 +291,7 @@ def main():
             result_image = draw_fps(result_image)
             cv2.imshow('yolo', result_image)
 
-        key = cv2.waitKey(30) & 0xFF
+        key = cv2.waitKey(1) & 0xFF
         if key == 27: # esc to quit
             break
 

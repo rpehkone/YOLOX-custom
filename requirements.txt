@@ -1,6 +1,4 @@
-# TODO: Update with exact module version
 numpy
-torch>=1.7
 opencv_python
 loguru
 tqdm
@@ -11,8 +9,8 @@ tabulate
 psutil
 tensorboard
 
-# verified versions
 # pycocotools corresponds to https://github.com/ppwwyyxx/cocoapi
+torch>=1.7
 pycocotools>=2.0.2
 onnx>=1.16.0
 onnxruntime-gpu>=1.17.1
