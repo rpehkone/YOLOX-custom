@@ -80,7 +80,6 @@ class Predictor(object):
                 outputs, self.num_classes, self.confthre,
                 self.nmsthre, class_agnostic=True
             )
-            logger.info("Infer time: {:.4f}s".format(time.time() - t0))
         return outputs, img_info
 
     def visual(self, output, img_info, cls_conf=0.35):
@@ -128,7 +127,6 @@ def create_predictor(args):
         ckpt = torch.load(ckpt_file, map_location="cpu")
         # load the model state dict
         model.load_state_dict(ckpt["model"])
-        logger.info("loaded checkpoint done.")
 
     if args.fuse:
         logger.info("\tFusing model...")
@@ -239,6 +237,27 @@ def track_frame(image):
         scores = scores.tolist()
         return bboxes, cls, scores
 
+frame_counter = 0
+prev_time = 0
+fps = 0
+def draw_fps(frame):
+    global frame_counter
+    global prev_time
+    global fps
+
+    frame_counter = frame_counter + 1
+    unix_time_seconds = int(time.time())
+    if unix_time_seconds != prev_time:
+        prev_time = unix_time_seconds
+        fps = frame_counter
+        frame_counter = 0
+
+    font_scale = 1.5
+    color = (0, 255, 255)
+    thickness = 2
+    cv2.putText(frame, str(fps), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness)
+    return frame
+
 def main():
     global predictor
     args = Args()
@@ -267,6 +286,7 @@ def main():
                 outputs, img_info = predictor.inference(frame)
                 result_image = predictor.visual(outputs[0], img_info, predictor.confthre)
 
+            result_image = draw_fps(result_image)
             cv2.imshow('yolo', result_image)
 
         key = cv2.waitKey(30) & 0xFF
