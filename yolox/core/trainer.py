@@ -8,14 +8,12 @@ from loguru import logger
 
 import torch
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.utils.tensorboard import SummaryWriter
 
 from yolox.data import DataPrefetcher
 from yolox.exp import Exp
 from yolox.utils import (
     MeterBuffer,
     ModelEMA,
-    WandbLogger,
     adjust_status,
     all_reduce_norm,
     get_local_rank,
@@ -28,7 +26,6 @@ from yolox.utils import (
     mem_usage,
     occupy_mem,
     save_checkpoint,
-    setup_logger,
     synchronize
 )
 
@@ -63,12 +60,6 @@ class Trainer:
         if self.rank == 0:
             os.makedirs(self.file_name, exist_ok=True)
 
-        setup_logger(
-            self.file_name,
-            distributed_rank=self.rank,
-            filename="train_log.txt",
-            mode="a",
-        )
 
     def train(self):
         self.before_train()
@@ -175,19 +166,6 @@ class Trainer:
         self.evaluator = self.exp.get_evaluator(
             batch_size=self.args.batch_size, is_distributed=self.is_distributed
         )
-        # Tensorboard and Wandb loggers
-        if self.rank == 0:
-            if self.args.logger == "tensorboard":
-                self.tblogger = SummaryWriter(os.path.join(self.file_name, "tensorboard"))
-            elif self.args.logger == "wandb":
-                self.wandb_logger = WandbLogger.initialize_wandb_logger(
-                    self.args,
-                    self.exp,
-                    self.evaluator.dataloader.dataset
-                )
-            else:
-                raise ValueError("logger must be either 'tensorboard' or 'wandb'")
-
         logger.info("Training start...")
         logger.info("\n{}".format(model))
 
@@ -195,9 +173,6 @@ class Trainer:
         logger.info(
             "Training of experiment is done and the best AP is {:.2f}".format(self.best_ap * 100)
         )
-        if self.rank == 0:
-            if self.args.logger == "wandb":
-                self.wandb_logger.finish()
 
     def before_epoch(self):
         logger.info("---> start train epoch{}".format(self.epoch + 1))
@@ -263,20 +238,6 @@ class Trainer:
                 + (", size: {:d}, {}".format(self.input_size[0], eta_str))
             )
 
-            if self.rank == 0:
-                if self.args.logger == "tensorboard":
-                    self.tblogger.add_scalar(
-                        "train/lr", self.meter["lr"].latest, self.progress_in_iter)
-                    for k, v in loss_meter.items():
-                        self.tblogger.add_scalar(
-                            f"train/{k}", v.latest, self.progress_in_iter)
-                if self.args.logger == "wandb":
-                    metrics = {"train/" + k: v.latest for k, v in loss_meter.items()}
-                    metrics.update({
-                        "train/lr": self.meter["lr"].latest
-                    })
-                    self.wandb_logger.log_metrics(metrics, step=self.progress_in_iter)
-
             self.meter.clear_meters()
 
         # random resizing
@@ -340,18 +301,6 @@ class Trainer:
         update_best_ckpt = ap50_95 > self.best_ap
         self.best_ap = max(self.best_ap, ap50_95)
 
-        if self.rank == 0:
-            if self.args.logger == "tensorboard":
-                self.tblogger.add_scalar("val/COCOAP50", ap50, self.epoch + 1)
-                self.tblogger.add_scalar("val/COCOAP50_95", ap50_95, self.epoch + 1)
-            if self.args.logger == "wandb":
-                self.wandb_logger.log_metrics({
-                    "val/COCOAP50": ap50,
-                    "val/COCOAP50_95": ap50_95,
-                    "train/epoch": self.epoch + 1,
-                })
-                self.wandb_logger.log_images(predictions)
-            logger.info("\n" + summary)
         synchronize()
 
         self.save_ckpt("last_epoch", update_best_ckpt, ap=ap50_95)
@@ -376,15 +325,3 @@ class Trainer:
                 ckpt_name,
             )
 
-            if self.args.logger == "wandb":
-                self.wandb_logger.save_checkpoint(
-                    self.file_name,
-                    ckpt_name,
-                    update_best_ckpt,
-                    metadata={
-                        "epoch": self.epoch + 1,
-                        "optimizer": self.optimizer.state_dict(),
-                        "best_ap": self.best_ap,
-                        "curr_ap": ap
-                    }
-                )
