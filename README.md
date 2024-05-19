@@ -1,3 +1,5 @@
+<img src="" width="900" height="auto"/>  
+
 ## Quick Start
 
 <details>
@@ -48,4 +50,4 @@ and uncomment one tracker in inference.py
 |[YOLOX-x](./exps/default/yolox_x.py)   |640   |51.1 |**51.5**  | 57    | 40 | 10 | 99.1 |281.9 | [github](https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_x.pth) |
 |[YOLOX-Darknet53](./exps/default/yolov3.py)   |640  | 47.7 | 48.0 | 90 | 49 | 13 | 63.7 | 185.3 | [github](https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_darknet.pth) |
 
-<img src="tools/plot_bench.png" width="900" height="auto"/>  
+<img src="img/plot_bench.png" width="900" height="auto"/>  
