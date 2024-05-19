@@ -8,7 +8,7 @@ import sys
 import time
 from typing import List
 
-__all__ = ["JitOp", "FastCOCOEvalOp"]
+__all__ = ["JitOp"]
 
 
 class JitOp:
@@ -116,23 +116,3 @@ class JitOp:
         module = self.load()
         os.remove(module.__file__)
 
-
-class FastCOCOEvalOp(JitOp):
-
-    def __init__(self, name="fast_cocoeval"):
-        super().__init__(name=name)
-
-    def absolute_name(self):
-        return f'yolox.layers.{self.name}'
-
-    def sources(self):
-        sources = glob.glob(os.path.join("yolox", "layers", "cocoeval", "*.cpp"))
-        if not sources:  # source will be empty list if the so file is removed after install
-            # use abosolute path to compile
-            import yolox
-            code_path = os.path.join(yolox.__path__[0], "layers", "cocoeval", "*.cpp")
-            sources = glob.glob(code_path)
-        return sources
-
-    def include_dirs(self):
-        return [os.path.join("yolox", "layers", "cocoeval")]

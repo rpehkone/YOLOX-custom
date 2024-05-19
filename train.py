@@ -35,8 +35,6 @@ class Args:
         self.name="yolox-s"#model name
         self.exp_file="exps/drone_s.py"#experiment description file
         self.ckpt=None
-        self.logger="wandb"
-        # self.logger="tensorboard"
         self.cache="ram"#Caching imgs to ram/disk for fast training.
         # self.cache=None#Caching imgs to ram/disk for fast training.
         # self.dist_backend="nccl"#distributed backend
