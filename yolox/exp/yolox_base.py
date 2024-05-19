@@ -147,9 +147,7 @@ class Exp(BaseExp):
                 max_labels=50,
                 flip_prob=self.flip_prob,
                 hsv_prob=self.hsv_prob
-            ),
-            cache=cache,
-            cache_type=cache_type,
+            )
         )
 
     def get_data_loader(self, batch_size, is_distributed, no_aug=False, cache_img: str = None):
@@ -176,8 +174,8 @@ class Exp(BaseExp):
         # else we will create self.dataset after launch
         if self.dataset is None:
             with wait_for_the_master():
-                assert cache_img is None, \
-                    "cache_img must be None if you didn't create self.dataset before launch"
+                # assert cache_img is None, \
+                #     "cache_img must be None if you didn't create self.dataset before launch"
                 self.dataset = self.get_dataset(cache=False, cache_type=cache_img)
 
         self.dataset = MosaicDetection(
